@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2'
 
 volumes:
     prometheus_data: {}
@@ -7,10 +7,9 @@ volumes:
 services:
 
   prometheus:
-    image: prom/prometheus:v1.8.0
+    image: image.token.im/consenlabs/prometheus
     container_name: prometheus
     volumes:
-      - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
     command:
       - '-config.file=/etc/prometheus/prometheus.yml'
@@ -25,12 +24,10 @@ services:
       - 9090
     labels:
       org.label-schema.group: "monitoring"
-  
+
   alertmanager:
-    image: prom/alertmanager
+    image: image.token.im/consenlabs/alertmanager
     container_name: alertmanager
-    volumes: 
-      - ./alertmanager/:/etc/alertmanager/
     command:
       - '-config.file=/etc/alertmanager/config.yml'
       - '-storage.path=/alertmanager'
@@ -69,17 +66,15 @@ services:
     expose:
       - 8080
     labels:
+      io.rancher.scheduler.global: 'true'
       org.label-schema.group: "monitoring"
-  
+
   grafana:
     image: grafana/grafana
     container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
+    env_file: .env_grafana
     restart: unless-stopped
     expose:
       - 3000
@@ -87,17 +82,15 @@ services:
       org.label-schema.group: "monitoring"
 
   caddy:
-    image: stefanprodan/caddy
+    image: image.token.im/consenlabs/caddy
     container_name: caddy
     ports:
       - "3000:3000"
       - "9090:9090"
       - "9093:9093"
-    volumes:
-      - ./caddy/:/etc/caddy/
-    environment:
-      - ADMIN_USER=${ADMIN_USER:-admin}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    env_file: .env_caddy
     restart: unless-stopped
     labels:
       org.label-schema.group: "monitoring"
+
+
