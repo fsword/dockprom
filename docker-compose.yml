@@ -1,8 +1,10 @@
 version: '2'
 
 volumes:
-    prometheus_data: {}
-    grafana_data: {}
+    prometheus_data:
+      driver: rancher-nfs
+    grafana_data:
+      driver: rancher-nfs
 
 services:
 
@@ -20,8 +22,6 @@ services:
       - '-storage.local.target-heap-size=1073741824'
       - '-storage.local.retention=200h'
     restart: unless-stopped
-    expose:
-      - 9090
     labels:
       org.label-schema.group: "monitoring"
 
@@ -32,8 +32,6 @@ services:
       - '-config.file=/etc/alertmanager/config.yml'
       - '-storage.path=/alertmanager'
     restart: unless-stopped
-    expose:
-      - 9093
     labels:
       org.label-schema.group: "monitoring"
 
@@ -49,8 +47,6 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
     restart: unless-stopped
-    expose:
-      - 9100
     labels:
       org.label-schema.group: "monitoring"
 
@@ -63,8 +59,6 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     restart: unless-stopped
-    expose:
-      - 8080
     labels:
       io.rancher.scheduler.global: 'true'
       org.label-schema.group: "monitoring"
@@ -76,8 +70,6 @@ services:
       - grafana_data:/var/lib/grafana
     env_file: .env_grafana
     restart: unless-stopped
-    expose:
-      - 3000
     labels:
       org.label-schema.group: "monitoring"
 
